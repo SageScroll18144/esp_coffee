@@ -1,44 +1,55 @@
 #include <Arduino.h>
+#include <BluetoothSerial.h>
 
 #define STATE_BLE_CONNECTION 0
 #define STATE_BLE_COMMAND 1
 #define STATE_COFFEE_BEHAVIOR 2
 
+#define flag_connected SerialBT.hasClient()
+
 int state = 0;
-bool flag_conected = false, flag_command = false;
+bool flag_command = false;
+
+char command;
+
+BluetoothSerial SerialBT;
 
 void setup() {
+  Serial.begin(115200);
+
+  SerialBT.begin("ESP32_Server"); // Inicia Bluetooth como servidor
+  Serial.println("Bluetooth iniciado. Aguardando conexão...");
 
 }
 
 void loop() {
   switch (state) {
     case STATE_BLE_CONNECTION:
-      if(flag_conected) {
+      if(flag_connected) {
         state = STATE_BLE_COMMAND;
-        flag_conected = false;
-      } else {
-        // BLE conection
-      }
-      
+      }      
       break;
     
     case STATE_BLE_COMMAND:
-      if(flag_command) {
+      if (SerialBT.available()) {
+        command = SerialBT.read(); 
+        Serial.print("Recebido: "); 
+        Serial.println(command);
         state = STATE_COFFEE_BEHAVIOR;
-        flag_command = false;
       } else {
-        // Receive BLE command
+        state = STATE_BLE_CONNECTION;
       }
-
       break;
     
     case STATE_COFFEE_BEHAVIOR:
 
-      // Connect with Database
-      // Make search
-      // Realize search
-      // Give the return to eletronic system
+      if (command == 's') { // start coffee
+        // Connect with Database
+        // Make search
+        // Realize search
+        // Give the return to eletronic system
+      } 
+      else if(command == 'o'); // turn off
 
       state = STATE_BLE_CONNECTION;
 
